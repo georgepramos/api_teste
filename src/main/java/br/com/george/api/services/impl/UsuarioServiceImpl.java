@@ -4,6 +4,7 @@ import br.com.george.api.domain.Usuario;
 import br.com.george.api.domain.dto.UsuarioDTO;
 import br.com.george.api.repositories.UsuarioRepository;
 import br.com.george.api.services.UsuarioService;
+import br.com.george.api.services.exceptions.DataIntegratyViolationException;
 import br.com.george.api.services.exceptions.ObjectNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,14 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario create(UsuarioDTO obj) {
+        findByEmail(obj);
         return repository.save(mapper.map(obj, Usuario.class));
+    }
+
+    private void findByEmail(UsuarioDTO obj){
+        Optional<Usuario> usuario = repository.findByEmail(obj.getEmail());
+        if(usuario.isPresent()){
+            throw new DataIntegratyViolationException("Email já cadastrado no sistema.");
+        }
     }
 }
